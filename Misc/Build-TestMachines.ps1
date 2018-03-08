@@ -1,8 +1,26 @@
 param (
 	[string]$Environment = "Prod",
-	[string]$Machines = "4"
+    	[string]$Quantity = "4",
+    	[string]$Name = "My Name"
 	)
 
+# Prod details
+$ProdSrv = "prodserver.domain.com"
+$ProdTemplate = "Prod_Template"
+$ProdBootDisk =  "[Datastore] Bootdisks/Prod_Boot.iso"
+
+# Int details
+$IntSrv = "prodserver.domain.com"
+$IntTemplate = "Int_Template"
+$IntBootDisk = "[Datastore] Bootdisks/Lab_Boot.iso"
+
+# VM Config - not needed since we use a template
+$VMDiskGB = "80" 
+$VMMemoryGB = "4" 
+$VMNumCpu = "2" 
+$VMNetworkName = "VLAN40"
+
+$DateStamp = get-date -UFormat %Y%m%d
 
 $OSType = [environment]::OSVersion.Platform
 if($OSType -eq "Win32NT") #Windows
@@ -24,11 +42,6 @@ elseif($OSType -eq "Unix") #MacOS
         }
     }
 
-
-
-# Disable CEIP participation dialog
-Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$False
-
 $Credentials = get-credential
 if(!($Credentials))
     {
@@ -37,34 +50,13 @@ if(!($Credentials))
     }
 
 
-
-$env = $environment
-$NumberOfNewVMs = $Machines
-
-$vmLocation = "My Name"
-
-# Prod details
-$ProdSrv = "prodserver.domain.com"
-$ProdTemplate = "Prod_Template"
-$ProdBootDisk =  "[VMware_Swing] Bootdisks/Prod_Boot.iso"
-# Int details
-$IntSrv = "intserver.domain.com"
-$IntTemplate = "Int_Template"
-$IntBootDisk = "[VMware_Swing] Bootdisks/Int_Boot.iso"
-
-# VM Details -unused
-$VMDiskGB = "80" 
-$VMMemoryGB = "4" 
-$VMNumCpu = "2" 
-$VMNetworkName = "VLAN40"
-
-if($env -eq "Int")
+if($Environment -eq "Int")
     {
     $vSphereSrv = $IntSrv
     $TemplateName = $IntTemplate
     $BootDisk = $IntBootDisk
     }
-elseif($env -eq "Prod")
+elseif($Environment -eq "Prod")
     {
     $vSphereSrv = $ProdSrv
     $TemplateName = $ProdTemplate 
@@ -77,6 +69,7 @@ else
     }
 
 
+# Remove backslash from Domain\username so username can be used in the VM name
 if($($credentials.username) -match '\\')
     {
     $UserName = $($($credentials.username).split('\'))[1]
@@ -87,17 +80,30 @@ else
     }
 
 
-$DateStamp = get-date -UFormat %Y%m%d
-Set-PowerCLIConfiguration -InvalidCertificateAction ignore -confirm:$false -Scope User #MacOS barks if this is missing
+# Disable CEIP participation dialog
+Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$False
+# MacOS barks if this is missing
+Set-PowerCLIConfiguration -InvalidCertificateAction ignore -confirm:$false -Scope User 
+# Connect to vSphere
 Connect-VIServer -server $vSphereSrv -Protocol https -Credential $Credentials
-$Win10Template = get-template -Name $TemplateName
+
+#Check if Template exists
+$Win10Template = get-template -Name $TemplateName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue -InformationAction SilentlyContinue
+if(!($Win10Template))
+    {
+    write-host "Specified Template was not found"
+    exit
+    }
+
 $vmWareCluster = Get-Cluster
 $storageCluster = get-datastorecluster
 
 
-for ($i = 1; $i -le $NumberOfNewVMs; $i++)
+for ($i = 1; $i -le $Quantity; $i++)
     {
-    $TempVMName = "$DateStamp - $env - $username $i"
+    # Check if template exists
+
+    $TempVMName = "$DateStamp - $Environment - $UserName $i"
     write-host "VM Name: $TempVMName"
     if(get-VM -Name $TempVMName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue -InformationAction SilentlyContinue)
         {
@@ -105,9 +111,8 @@ for ($i = 1; $i -le $NumberOfNewVMs; $i++)
         }
     else
         {
-
-        # Create VM
-        New-VM -Name $TempVMName -Template $Win10Template -ResourcePool $vmWareCluster -Datastore $storageCluster -Location $vmLocation 
+                # Create VM
+        New-VM -Name $TempVMName -Template $Win10Template -ResourcePool $vmWareCluster -Datastore $storageCluster -Location $Name
         $TempNewVM = get-vm $TempVMName
 
 
