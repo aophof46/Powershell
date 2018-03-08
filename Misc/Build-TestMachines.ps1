@@ -1,19 +1,30 @@
-﻿
 param (
 	[string]$Environment = "Prod",
-    [string]$Machines = "4"
+	[string]$Machines = "4"
 	)
 
 
-if(!(get-packageprovider -Name "Nuget"))
+$OSType = [environment]::OSVersion.Platform
+if($OSType -eq "Win32NT") #Windows
     {
-    Install-PackageProvider -Name NuGet -Force
+    if(!(get-packageprovider -Name "Nuget"))
+        {
+        Install-PackageProvider -Name NuGet -Force
+        }
+    if(!(get-module -Name "VMware.VIMAutomation.Cis.Core"))
+        {
+        Find-Module -Name vmware.powercli -Repository PSGallery | Install-Module
+        }
+    }
+elseif($OSType -eq "Unix") #MacOS
+    {
+    if(!(Get-Module -Name VMware.PowerCLI -ListAvailable))
+        {
+        Install-Module -Name VMware.PowerCLI -Scope CurrentUser -Force
+        }
+    }
 
-    }
-if(!(get-module -Name "VMware.VIMAutomation.Cis.Core"))
-    {
-    Find-Module -Name vmware.powercli -Repository PSGallery | Install-Module
-    }
+
 
 # Disable CEIP participation dialog
 Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$False
@@ -26,9 +37,7 @@ if(!($Credentials))
     }
 
 
-# Prod / Int
-#$env = "Prod"
-#$NumberOfNewVMs = "4"
+
 $env = $environment
 $NumberOfNewVMs = $Machines
 
@@ -79,6 +88,7 @@ else
 
 
 $DateStamp = get-date -UFormat %Y%m%d
+Set-PowerCLIConfiguration -InvalidCertificateAction ignore -confirm:$false -Scope User #MacOS barks if this is missing
 Connect-VIServer -server $vSphereSrv -Protocol https -Credential $Credentials
 $Win10Template = get-template -Name $TemplateName
 $vmWareCluster = Get-Cluster
