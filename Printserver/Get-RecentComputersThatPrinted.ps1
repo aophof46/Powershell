@@ -1,8 +1,9 @@
 import-module activedirectory
 
-$Server = "<Printserver name"
+$Server = "<Printserver name>"
 $DaysToSearch = "2"
-$pattern = "on \w*-{1}\w* was printed"
+$ComputerNameRegex = "\w*-{1}\w*"
+$pattern = "on $ComputerNameRegex was printed"
 $messages = @()
 $results = Get-WinEvent -ComputerName $Server -FilterHashTable @{LogName="Microsoft-Windows-PrintService/Operational"; StartTime=$((Get-Date).AddDays(-$DaysToSearch)); ID=307}
 
