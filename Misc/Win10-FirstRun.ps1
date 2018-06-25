@@ -12,7 +12,7 @@ choco feature enable -n allowGlobalConfirmation
 # install software
 
 $software = @{}
-$software = "7zip", "rufus", "itunes", "dropbox", "chrome", "firefox", "putty", "postman", "pibakery", "evernote", "notepad++", "steam", "realvnc", "spotify", "teamviewer", "google-drive-file-stream"
+$software = "7zip", "rufus", "itunes", "dropbox", "chrome", "firefox", "putty", "postman", "pibakery", "evernote", "notepad++", "github", "steam", "realvnc", "spotify", "teamviewer", "google-drive-file-stream"
 
 foreach($install in $software)
     {
