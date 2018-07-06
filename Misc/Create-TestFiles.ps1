@@ -8,7 +8,7 @@ if(!(Test-Path $LocationOfFiles))
     New-Item -ItemType Directory $LocationOfFiles
     }
 
-for($i = 0; $i -lt $NumberOfFiles; $i++)
+for($i = 1; $i -le $NumberOfFiles; $i++)
     {
     $Size = Get-Random -Minimum 1 -Maximum $SizeofFile
     $Path = $LocationOfFiles + '\' + $NameOfFile + '_' + $i + '.TestFile'
