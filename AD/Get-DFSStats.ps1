@@ -98,16 +98,14 @@ foreach ($Group in $RGroups)
     } # Closing iteration through all connections
 } # Closing iteration through all groups
 
-
-$NamespaceHTML = $DFSRootTargets | Select-object -Property Path, TargetPath, State | ConvertTo-Html -Fragment
+$NamespaceHTML = $DFSRootTargets | Select-object -Property Path, TargetPath, State | sort-object "Path" | ConvertTo-Html -Fragment
 $NamespaceHTML = $NamespaceHTML -replace "Offline","<font color=red>Offline</font>"
 $NamespaceHTML = $NamespaceHTML -replace "Online","<font color=green>Online</font>"
 
-$ReplicationHTML = $ReplicationStatusArray | ConvertTo-Html -Fragment
+$ReplicationHTML = $ReplicationStatusArray | Sort-Object "Replication Group" | ConvertTo-Html -Fragment
 $ReplicationHTML = $ReplicationHTML -replace "</td><td>([0]{1})</td></tr>",$("</td><td><font color=green>"+'$1'+"</font></td></tr>")
 $ReplicationHTML = $ReplicationHTML -replace "</td><td>([1-9]{1})</td></tr>",$("</td><td><font color=yellow>"+'$1'+"</font></td></tr>")
 $ReplicationHTML = $ReplicationHTML -replace "</td><td>([1-9]{2,})</td></tr>",$("</td><td><font color=red>"+'$1'+"</font></td></tr>")
-
 
 $ReportHTML = ""
 $ReportHTML += "<p><strong>DFS Namespace Status</strong></p>"
