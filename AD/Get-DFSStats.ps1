@@ -1,3 +1,4 @@
+# Note: RSAT DFS management tools need to be installed on the PC this runs on.
 $ReplicationServers = "dfsserver1.fqdn", "dfsserver2.fqdn"
 $StatusFile = "C:\temp\dfs-output.htm"
 
