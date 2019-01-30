@@ -33,7 +33,7 @@ $date=Get-Date -format M-d-yy
 $cs = Get-WmiObject -Class Win32_ComputerSystem
 
 Write-LogEntry "Script path: $ScriptPath"
-Write-LogEntry "Windows direcotry: $WINDIR"
+Write-LogEntry "Windows directory: $WINDIR"
 Write-LogEntry "Program Files: $PROGRAMFILES"
 Write-LogEntry "All Users: $ALLUSERS"
 Write-LogEntry "System Drive: $SYSDRIVE"
