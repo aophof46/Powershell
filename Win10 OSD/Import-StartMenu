@@ -47,8 +47,11 @@ Write-LogEntry "Computer Owner: $($cs.PrimaryOwnerName)"
 
 if("$ScriptPath\LayoutModification.xml")
     {
-    Write-LogEntry "LayoutModification file found, importing now"
-    Import-StartLayout -LayoutPath $ScriptPath\LayoutModification.xml -MountPath $env:SystemDrive\
+    Write-LogEntry "LayoutModification file found, copying now"
+    # Import-StartLayout seems to not like the xml file when taskbar customizations are included
+    #Import-StartLayout -LayoutPath $ScriptPath\LayoutModification.xml -MountPath $env:SystemDrive\
+    # Import Start Menu and Taskbar Layout
+    Copy-Item -Path "$ScriptPath\LayoutModification.xml" -Destination "$env:SystemDrive\Default\AppData\Local\Microsoft\Windows\Shell\" -Force
     }
 else
     {
