@@ -1,4 +1,3 @@
-
 # Functions
 function Write-LogEntry {
     param(
@@ -22,11 +21,12 @@ function Write-LogEntry {
     }
 }
 
-
 $ScriptPath = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+
 $WINDIR=$env:WINDIR
 $PROGRAMFILES=$env:ProgramW6432
 $ALLUSERS = $env:ALLUSERSPROFILE
+$APPDATA = $env:APPDATA
 $SYSDRIVE = $env:SystemDrive
 $OSversion = [System.Environment]::OSVersion.Version.Build
 $date=Get-Date -format M-d-yy
