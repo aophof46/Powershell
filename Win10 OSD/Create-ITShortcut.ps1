@@ -1,4 +1,3 @@
-
 # Functions
 function Write-LogEntry {
     param(
@@ -22,11 +21,12 @@ function Write-LogEntry {
     }
 }
 
-
 $ScriptPath = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+
 $WINDIR=$env:WINDIR
 $PROGRAMFILES=$env:ProgramW6432
 $ALLUSERS = $env:ALLUSERSPROFILE
+$APPDATA = $env:APPDATA
 $SYSDRIVE = $env:SystemDrive
 $OSversion = [System.Environment]::OSVersion.Version.Build
 $date=Get-Date -format M-d-yy
@@ -46,9 +46,7 @@ Write-LogEntry "Computer Owner: $($cs.PrimaryOwnerName)"
 
 #file paths for Internet Explorer
 $iePath = "$PROGRAMFILES\Internet Explorer\iexplore.exe"
-$ie64Path = "FALSE"
-
-$ieLnk = "$ALLUSERS\Microsoft\Windows\Start Menu\Programs\Accessories\Internet Explorer.lnk"
+$ieLnk = "$APPDATA\Microsoft\Windows\Start Menu\Programs\Accessories\Internet Explorer.lnk"
 
 # Create IE shortcut 
 if(!(Test-Path $ieLnk))
@@ -61,17 +59,9 @@ if(!(Test-Path $ieLnk))
         $Shortcut.TargetPath = $iePath
         $Shortcut.Save()
         }
-    elseif (Test-Path $ie64Path)
-        {
-        Write-LogEntry "creating shortcut for $iePath64 at $ieLnk"
-        $WshShell = New-Object -comObject WScript.Shell
-        $Shortcut = $WshShell.CreateShortcut($ieLnk)
-        $Shortcut.TargetPath = $ie64Path
-        $Shortcut.Save()
-        }
     else
         {
-        Write-LogEntry "neither $iePath or $ie64Path exist"
+        Write-LogEntry "$iePath does not exist"
         }
     }
 else
