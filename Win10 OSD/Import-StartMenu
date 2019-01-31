@@ -22,9 +22,11 @@ function Write-LogEntry {
 }
 
 $ScriptPath = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+
 $WINDIR=$env:WINDIR
 $PROGRAMFILES=$env:ProgramW6432
 $ALLUSERS = $env:ALLUSERSPROFILE
+$APPDATA = $env:APPDATA
 $SYSDRIVE = $env:SystemDrive
 $OSversion = [System.Environment]::OSVersion.Version.Build
 $date=Get-Date -format M-d-yy
@@ -42,10 +44,6 @@ Write-logEntry "Computer Model: $($cs.model)"
 Write-LogEntry "Computer Name: $($cs.name)"
 Write-LogEntry "Computer Owner: $($cs.PrimaryOwnerName)"
 
-
-# LayoutModification.xml is created by modifying the start menu on a reference computer to your liking,
-# then running the command 'Export-StartLayout -Path C:\Temp\LayoutModification.xml'
-# Copy that xml file into the same directory as this script and execute during the task sequence.
 
 if("$ScriptPath\LayoutModification.xml")
     {
