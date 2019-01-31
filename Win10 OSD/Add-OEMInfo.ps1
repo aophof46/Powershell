@@ -1,13 +1,13 @@
 # Functions
 function Write-LogEntry {
     param(
-        [parameter(Mandatory=$true, HelpMessage="Value added to the ITShortcut.log file.")]
+        [parameter(Mandatory=$true, HelpMessage="Value added to the OEMInfo.log file.")]
         [ValidateNotNullOrEmpty()]
         [string]$Value,
 
         [parameter(Mandatory=$false, HelpMessage="Name of the log file that the entry will written to.")]
         [ValidateNotNullOrEmpty()]
-        [string]$FileName = "ITShortcut.log"
+        [string]$FileName = "OEMInfo.log"
     )
     # Determine log file location
     $LogFilePath = Join-Path -Path $env:windir -ChildPath "Temp\$($FileName)"
@@ -17,7 +17,7 @@ function Write-LogEntry {
         Add-Content -Value $Value -LiteralPath $LogFilePath -ErrorAction Stop
     }
     catch [System.Exception] {
-        Write-Warning -Message "Unable to append log entry to ITShortcut.log file"
+        Write-Warning -Message "Unable to append log entry to OEMInfo.log file"
     }
 }
 
@@ -33,7 +33,7 @@ $date=Get-Date -format M-d-yy
 $cs = Get-WmiObject -Class Win32_ComputerSystem
 
 Write-LogEntry "Script path: $ScriptPath"
-Write-LogEntry "Windows direcotry: $WINDIR"
+Write-LogEntry "Windows directory: $WINDIR"
 Write-LogEntry "Program Files: $PROGRAMFILES"
 Write-LogEntry "All Users: $ALLUSERS"
 Write-LogEntry "System Drive: $SYSDRIVE"
@@ -46,7 +46,7 @@ Write-LogEntry "Computer Owner: $($cs.PrimaryOwnerName)"
 
 #################################################################################################################################
 # Support Information
-
+#copy-item -Force $ScriptPath\oemlogo.bmp "$WINDIR\system32\oemlogo.bmp"
 
 $manufacturer = $cs.Manufacturer
 $model = $cs.Model
