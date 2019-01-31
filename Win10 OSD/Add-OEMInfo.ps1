@@ -1,14 +1,13 @@
-
 # Functions
 function Write-LogEntry {
     param(
-        [parameter(Mandatory=$true, HelpMessage="Value added to the OEMInfo.log file.")]
+        [parameter(Mandatory=$true, HelpMessage="Value added to the ITShortcut.log file.")]
         [ValidateNotNullOrEmpty()]
         [string]$Value,
 
         [parameter(Mandatory=$false, HelpMessage="Name of the log file that the entry will written to.")]
         [ValidateNotNullOrEmpty()]
-        [string]$FileName = "OEMInfo.log"
+        [string]$FileName = "ITShortcut.log"
     )
     # Determine log file location
     $LogFilePath = Join-Path -Path $env:windir -ChildPath "Temp\$($FileName)"
@@ -18,15 +17,16 @@ function Write-LogEntry {
         Add-Content -Value $Value -LiteralPath $LogFilePath -ErrorAction Stop
     }
     catch [System.Exception] {
-        Write-Warning -Message "Unable to append log entry to OEMInfo.log file"
+        Write-Warning -Message "Unable to append log entry to ITShortcut.log file"
     }
 }
 
-
 $ScriptPath = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+
 $WINDIR=$env:WINDIR
 $PROGRAMFILES=$env:ProgramW6432
 $ALLUSERS = $env:ALLUSERSPROFILE
+$APPDATA = $env:APPDATA
 $SYSDRIVE = $env:SystemDrive
 $OSversion = [System.Environment]::OSVersion.Version.Build
 $date=Get-Date -format M-d-yy
@@ -44,11 +44,9 @@ Write-logEntry "Computer Model: $($cs.model)"
 Write-LogEntry "Computer Name: $($cs.name)"
 Write-LogEntry "Computer Owner: $($cs.PrimaryOwnerName)"
 
-
-
 #################################################################################################################################
 # Support Information
-#copy-item -Force $ScriptPath\oemlogo.bmp "$WINDIR\system32\oemlogo.bmp"
+
 
 $manufacturer = $cs.Manufacturer
 $model = $cs.Model
@@ -82,5 +80,5 @@ if(-not (Test-Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\OEMInformati
 New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\OEMInformation" -Name Logo -PropertyType String -Value "%systemroot%\system32\OEMLogo.bmp" -Force
 New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\OEMInformation" -Name Manufacturer -PropertyType String -Value "$manufacturer" -Force
 New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\OEMInformation" -Name Model -PropertyType String -Value "$model" -Force
-New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\OEMInformation" -Name SupportPhone -PropertyType String -Value "(555) 867-5309" -Force
+#New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\OEMInformation" -Name SupportPhone -PropertyType String -Value "(555) 867-5309" -Force
 #################################################################################################################################
