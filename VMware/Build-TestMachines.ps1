@@ -3,8 +3,7 @@ param (
     [string]$Quantity = "1",
     [string]$Type = "Build"
 	)
-
-
+	
 # vSphere Servers
 $ProdSrv = "PRODUCTION_VCENTER"
 $LabSrv = "LAB_VCENTER"
