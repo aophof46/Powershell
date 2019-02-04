@@ -4,11 +4,15 @@ param (
     [string]$Type = "Build"
 	)
 
-# Prod details
-$ProdSrv = "PRODUCTION_VCENTER"
 
-# Int details
+# vSphere Servers
+$ProdSrv = "PRODUCTION_VCENTER"
 $LabSrv = "LAB_VCENTER"
+
+# Bootdisk details
+$BuildBootDisk = "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_BUILD_x64.iso"
+$LabBootDisk = "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_LAB_x64.iso"
+$ProdBootDisk = "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_PROD_x64.iso"
 
 # VM Config
 $VMDiskGB = "80" 
@@ -47,30 +51,28 @@ if(!($Credentials))
     exit
     }
 
+# Type of machine (determine which bootdisk to use)
 if($Type -eq "Lab")
     {
-    $BootDisk =  "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_LAB_x64.iso"
+    $BootDisk =  $LabBootDisk 
     }
 elseif($Type -eq "Prod")
     {
-    $BootDisk =  "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_PROD_x64.iso"
+    $BootDisk =  $ProdBootDisk
     }
 else
     {
-    $BootDisk =  "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_BUILD_x64.iso"
+    $BootDisk =  $BuildBootDisk
     }
 
+# Environment (determine which vSphere server to use)
 if($Environment -eq "Lab")
     {
     $vSphereSrv = $LabSrv
-    #$TemplateName = $IntTemplate
-    #$BootDisk = $IntBootDisk
     }
 elseif($Environment -eq "Prod")
     {
     $vSphereSrv = $ProdSrv
-    #$TemplateName = $ProdTemplate 
-    #$BootDisk = $ProdBootDisk
     }
 else
     {
