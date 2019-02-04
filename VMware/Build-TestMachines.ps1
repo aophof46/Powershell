@@ -1,24 +1,22 @@
 param (
 	[string]$Environment = "Prod",
-    	[string]$Quantity = "4",
-    	[string]$Name = "My Name"
+    [string]$Quantity = "1",
+    [string]$Type = "Build"
 	)
 
 # Prod details
-$ProdSrv = "prodserver.domain.com"
-$ProdTemplate = "Prod_Template"
-$ProdBootDisk =  "[Datastore] Bootdisks/Prod_Boot.iso"
+$ProdSrv = "PRODUCTION_VCENTER"
 
 # Int details
-$IntSrv = "prodserver.domain.com"
-$IntTemplate = "Int_Template"
-$IntBootDisk = "[Datastore] Bootdisks/Lab_Boot.iso"
+$LabSrv = "LAB_VCENTER"
 
-# VM Config - not needed since we use a template
+# VM Config
 $VMDiskGB = "80" 
 $VMMemoryGB = "4" 
 $VMNumCpu = "2" 
-$VMNetworkName = "VLAN40"
+$VMFolder = "VM_FOLDER_NAME"
+$VMDatastore = "VM_DATASTORE_NAME"
+$VMNetworkName = "CLIENT_NETWORK_NAME"
 
 $DateStamp = get-date -UFormat %Y%m%d
 
@@ -49,25 +47,36 @@ if(!($Credentials))
     exit
     }
 
-
-if($Environment -eq "Int")
+if($Type -eq "Lab")
     {
-    $vSphereSrv = $IntSrv
-    $TemplateName = $IntTemplate
-    $BootDisk = $IntBootDisk
+    $BootDisk =  "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_LAB_x64.iso"
+    }
+elseif($Type -eq "Prod")
+    {
+    $BootDisk =  "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_PROD_x64.iso"
+    }
+else
+    {
+    $BootDisk =  "[NAME_OF_DATASTORE] DATASTORE_FOLDER/MDT_BUILD_x64.iso"
+    }
+
+if($Environment -eq "Lab")
+    {
+    $vSphereSrv = $LabSrv
+    #$TemplateName = $IntTemplate
+    #$BootDisk = $IntBootDisk
     }
 elseif($Environment -eq "Prod")
     {
     $vSphereSrv = $ProdSrv
-    $TemplateName = $ProdTemplate 
-    $BootDisk = $ProdBootDisk
+    #$TemplateName = $ProdTemplate 
+    #$BootDisk = $ProdBootDisk
     }
 else
     {
     write-host "No environment selected"
     exit
     }
-
 
 # Remove backslash from Domain\username so username can be used in the VM name
 if($($credentials.username) -match '\\')
@@ -79,6 +88,22 @@ else
     $UserName = $Credentials.UserName
     }
 
+# Get Boot disk name
+if($($BootDisk) -match '\/')
+    {
+    $ISOName = $($($BootDisk).split('/'))[1]
+    }
+else
+    {
+    $ISOName = $BootDisk
+    }
+
+if($($ISOName) -match '.iso')
+    {
+    $ISOName = $($($ISOName).split('.iso'))[0]
+    }
+
+
 
 # Disable CEIP participation dialog
 Set-PowerCLIConfiguration -Scope User -ParticipateInCEIP $false -Confirm:$False
@@ -87,23 +112,15 @@ Set-PowerCLIConfiguration -InvalidCertificateAction ignore -confirm:$false -Scop
 # Connect to vSphere
 Connect-VIServer -server $vSphereSrv -Protocol https -Credential $Credentials
 
-#Check if Template exists
-$Win10Template = get-template -Name $TemplateName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue -InformationAction SilentlyContinue
-if(!($Win10Template))
-    {
-    write-host "Specified Template was not found"
-    exit
-    }
-
 $vmWareCluster = Get-Cluster
 $storageCluster = get-datastorecluster
-
 
 for ($i = 1; $i -le $Quantity; $i++)
     {
     # Check if template exists
 
-    $TempVMName = "$DateStamp - $Environment - $UserName $i"
+    #$TempVMName = "$DateStamp - $Environment - $UserName $i"
+    $TempVMName = $ISOName + "_VM" + $i
     write-host "VM Name: $TempVMName"
     if(get-VM -Name $TempVMName -ErrorAction SilentlyContinue -WarningAction SilentlyContinue -InformationAction SilentlyContinue)
         {
@@ -112,17 +129,12 @@ for ($i = 1; $i -le $Quantity; $i++)
     else
         {
                 # Create VM
-        New-VM -Name $TempVMName -Template $Win10Template -ResourcePool $vmWareCluster -Datastore $storageCluster -Location $Name
+        New-VM -Name $TempVMName -GuestId windows7_64Guest -ResourcePool $vmWareCluster -Datastore $VMDatastore -Location $VMFolder -DiskGB $VMDiskGB -MemoryGB $VMMemoryGB -NumCpu $VMNumCpu -NetworkName $VMNetworkName -Notes "$Datestamp - Automated build of $ISOName"
+        
         $TempNewVM = get-vm $TempVMName
 
-
-        #  Set first time boot to boot menu
-        $spec = New-Object VMware.Vim.VirtualMachineConfigSpec
-        $spec.BootOptions = New-Object VMware.Vim.VirtualMachineBootOptions
-        $spec.BootOptions.EnterBIOSSetup = $true
-        $TempNewVM.ExtensionData.ReconfigVM($spec)
-
-
+        # Configure Network adapter as E100e (winpe driver support reasons)
+        set-networkadapter -NetworkAdapter $(Get-NetworkAdapter $TempNewVM) -Type e1000e -Confirm:$false
 
         # Configure CD Drive with ISO
         if(Get-CDDrive -VM $TempNewVM)
@@ -138,5 +150,3 @@ for ($i = 1; $i -le $Quantity; $i++)
         
         }
     }
-
-    
