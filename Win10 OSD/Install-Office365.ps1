@@ -1,3 +1,8 @@
+﻿param (
+	    [string]$ConfigFile = "Office365.xml",
+        [string]$branch = "Semi-Annual"
+	)
+
 # Functions
 function Write-LogEntry {
     param(
@@ -21,8 +26,9 @@ function Write-LogEntry {
     }
 }
 
-$ScriptPath = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+$NetworkPath = "DFS_OR_UNC_NETWORK_LOCATION"
 
+$ScriptPath = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 $WINDIR=$env:WINDIR
 $PROGRAMFILES=$env:ProgramW6432
 $ALLUSERS = $env:ALLUSERSPROFILE
@@ -43,17 +49,41 @@ Write-LogEntry "Computer Manufacturer: $($cs.manufacturer)"
 Write-logEntry "Computer Model: $($cs.model)"
 Write-LogEntry "Computer Name: $($cs.name)"
 Write-LogEntry "Computer Owner: $($cs.PrimaryOwnerName)"
+Write-LogEntry "Network Path: $NetworkPath"
+Write-LogEntry "Config File: $ConfigFile"
+Write-LogEntry "Branch: $branch"
 
-
-if("$ScriptPath\LayoutModification.xml")
+if($branch -eq "monthly")
     {
-    Write-LogEntry "LayoutModification file found, copying now"
-    # Import-StartLayout seems to not like the xml file when taskbar customizations are included
-    #Import-StartLayout -LayoutPath $ScriptPath\LayoutModification.xml -MountPath $env:SystemDrive\
-    # Import Start Menu and Taskbar Layout
-    Copy-Item -Path "$ScriptPath\LayoutModification.xml" -Destination "$env:SystemDrive\Default\AppData\Local\Microsoft\Windows\Shell\" -Force
+    Write-LogEntry "$branch branch specified"
+    $NetworkPath = "$NetworkPath\o365-2016-Monthly"
     }
 else
     {
-    Write-LogEntry "LayoutModification file not found in $ScriptPath"
+    Write-LogEntry "Default branch of semi-annual chosen"
+    $NetworkPath = "$NetworkPath\o365-2016-Semi-Annual"
     }
+
+$LocalPath = "C:\Setup\Office365"
+
+if(!(Test-Path $localPath))
+    {
+    Write-LogEntry "Creating $LocalPath"
+    New-Item -ItemType Directory -Path $LocalPath
+    }
+else
+    {
+    Write-LogEntry "That's odd... $LocalPath already exists..."
+    }
+
+Write-LogEntry "Copying o365 files from $NetworkPath to $LocalPath"
+Copy-Item -Path $NetworkPath\* -Destination $LocalPath -Recurse -Force
+
+Write-LogEntry "Contents of $LocalPath"
+Write-Logentry "$(get-childitem C:\setup\Office365)"
+
+$SetupEXE = "$LocalPath\setup.exe"
+$CONFIGURATIONFILE = "$LocalPath\MDTConfig\$ConfigFile"
+
+Write-LogEntry "Executing $SetupEXE /CONFIGURE $CONFIGURATIONFILE"
+& $SetupEXE /CONFIGURE $CONFIGURATIONFILE
