@@ -4,17 +4,8 @@ $gpos = get-gpo -all
 foreach($gpo in $gpos)
     {
     $gpo.displayname
-    $security = $gpo.getsecurityinfo()
-    foreach($user in $security)
-        {
-        $UserFound = $false
-        if($($user.trustee).name -eq $DelegateUser)
-            {
-            $UserFound = $true
-            break
-            }
-        }
-    If($UserFound)
+    $UserFound = $false
+    if($gpo.GetSecurityInfo().trustee.name -contains $DelegateUser)
         {
         write-host "$DelegateUser found" -ForegroundColor Green
         }
