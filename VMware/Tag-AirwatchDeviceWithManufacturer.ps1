@@ -75,7 +75,7 @@ Return $TagID
 }
 
 Function Get-AirwatchTagDevices {
-Write-Host("Getting Devices tagged with from Tag ID")
+Write-Host("Getting Devices tagged with specified Tag ID")
 $endpointURL = $url + "/mdm/tags/" + $AirwatchTagID + "/devices"
 $webTagDevicesReturn = Invoke-RestMethod -Method Get -Uri $endpointURL -Headers $header
 $TagDevicesID = $webTagDevicesReturn.Device.DeviceID
@@ -139,6 +139,7 @@ $AirwatchTagID = Get-AirwatchTagID($TagName, $AirwatchGroupID)
 #Get Device IDs that were already tagged with the tag we care about
 $AirwatchTagDevices = Get-AirwatchTagDevices($AirwatchTagID)
 
+#Check if device is already tagged, if not, tag it.
 if($AirwatchTagDevices -eq $AirwatchDeviceID)
     {
     write-host "Device is already tagged appropriately"
