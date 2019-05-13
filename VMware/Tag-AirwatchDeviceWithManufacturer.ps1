@@ -5,7 +5,6 @@
 
   .SYNOPSIS
     This Powershell script allows you to automatically create tags in Airwatch for Devices that exist in Airwatch with their Manufacturer name
-    MUST RUN AS ADMIN
   .DESCRIPTION
    This script connects to WMI and retrieves computer system information. The script will tag a device in the specified environment with the corresponding manufacturer tag.
    This facilitates device assignmnet to Smart Groups with tag filter criteria.  Please have the appropriate tags (Dell, HP, etc) created beforehand.
