@@ -5,16 +5,17 @@
 
   .SYNOPSIS
     This Powershell script allows you to automatically create tags in Airwatch for Devices that exist in Airwatch with their Manufacturer name
+    MUST RUN AS ADMIN
   .DESCRIPTION
    This script connects to WMI and retrieves computer system information. The script will tag a device in the specified environment with the corresponding manufacturer tag.
-   This facilitates device assignmnet to Smart Groups with tag filter criteria.  Please have the appropriate tags (Dell, HP, etc) created beforehand.
+   This facilitates device assignmnet to Smart Groups with tag filter criteria.
   .EXAMPLE
     .\Tag-AirwatchDeviceWithManufacturer.ps1 `
         -AirwatchServer "https://airwatch.company.com" `
         -AirwatchUser "Username" `
         -AirwatchPW "SecurePassword" `
         -AirwatchAPIKey "iVvHQnSXpX5elicaZPaIlQ8hCe5C/kw21K3glhZ+g/g=" `
-        -AWOrganizationGroupName "myOGname" `
+        -AWOrganizationGroupName "myogname" `
     .PARAMETER AirwatchServer
     Server URL for the AirWatch API Server
     .PARAMETER AirwatchUser
@@ -26,6 +27,7 @@
     and you will find the key in the API Key field.  If it is not there you may need override the settings and Enable API Access
     .PARAMETER AWOrganizationGroupName
     The name of the Organization Group where the device will be registered. 
+
 
 #>
 
@@ -49,6 +51,19 @@
         [string]$AWOrganizationGroupName
 
 )
+
+<#
+#Debug values
+$AirwatchServer = "https://as1506.awmdm.com"
+$AirwatchUser = "RDVDOMAIN\AirwatchAPISvc"
+$AirwatchPW = "zCulfg5ohp66uCFV"
+$AirwatchAPIKey = "m2inkT7A/Bp7CluuDJzZ+ck1kvFrPf9OXGVYm7z/Ukk="
+$AWOrganizationGroupName = "RDVCorp"
+$SerialNumber = "5444QH2"
+$AirwatchGroupID = ""
+$AirwatchDeviceID = ""
+#>
+
 
 Function Get-OrganizationGroupID {
 Write-Host("Getting Group ID from Group Name")
@@ -75,7 +90,7 @@ Return $TagID
 }
 
 Function Get-AirwatchTagDevices {
-Write-Host("Getting Devices tagged with specified Tag ID")
+Write-Host("Getting Devices tagged with from Tag ID")
 $endpointURL = $url + "/mdm/tags/" + $AirwatchTagID + "/devices"
 $webTagDevicesReturn = Invoke-RestMethod -Method Get -Uri $endpointURL -Headers $header
 $TagDevicesID = $webTagDevicesReturn.Device.DeviceID
@@ -92,7 +107,6 @@ Return $webSetDeviceReturn
 }
 
 $SystemInfo = get-wmiobject -class win32_bios
-$SerialNumber = $SystemInfo.SerialNumber
 if($SystemInfo.Manufacturer -like "*VMware*")
     {
     echo "VM found"
@@ -105,13 +119,8 @@ elseif($SystemInfo.Manufacturer -like "*Dell*")
     }
 elseif($SystemInfo.Manufacturer -like "*Microsoft*")
     {
-    echo "Microsoft found"
+    echo "Dell found"
     $TagName = "Microsoft"
-    }
-elseif(($SystemInfo.Manufacturer -like "*HP*") -or ($SystemInfo.Manufacturer -like "*Hewlett*"))
-    {
-    echo "HP found"
-    $TagName = "HP"
     }
 
 $URL = $AirwatchServer + "/API"
@@ -139,13 +148,12 @@ $AirwatchTagID = Get-AirwatchTagID($TagName, $AirwatchGroupID)
 #Get Device IDs that were already tagged with the tag we care about
 $AirwatchTagDevices = Get-AirwatchTagDevices($AirwatchTagID)
 
-#Check if device is already tagged, if not, tag it.
 if($AirwatchTagDevices -eq $AirwatchDeviceID)
     {
     write-host "Device is already tagged appropriately"
     }
 else
     {
-    write-host "no match - setting tag"
+    write-host "no match"
     $Result = Set-AirwatchDeviceTag($AirwatchTagID, $AirwatchDeviceID)
     }
