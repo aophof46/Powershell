@@ -1,3 +1,4 @@
+# Adapted from https://paullimblog.wordpress.com/2018/10/06/microsoft-security-update-api/
 
 if(!(Get-module -Name MsrcSecurityUpdates)) {
     Install-Module -Name MsrcSecurityUpdates -Force -Confirm:$false
