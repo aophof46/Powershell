@@ -11,4 +11,4 @@ Set-MSRCApiKey -ApiKey $APIKey -Verbose
 
 $cveMonth = get-date -UFormat %Y-%b
 
-Get-MsrcCvrfDocument -ID $cveMonth | Get-MsrcVulnerabilityReportHtml | Out-File -FilePath "c:\temp\$vceMonth-cvrf-CVE-Summary.html"
+Get-MsrcCvrfDocument -ID $cveMonth | Get-MsrcVulnerabilityReportHtml | Out-File -FilePath "c:\temp\$cveMonth-cvrf-CVE-Summary.html"
