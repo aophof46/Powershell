@@ -1,6 +1,6 @@
 <# Tag Devices in Airwatch with Manufacturer Name
 
-#Author: Adam Ophoff
+#Modified by: Adam Ophoff
 #March 2019
 
   .SYNOPSIS
