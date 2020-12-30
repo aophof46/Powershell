@@ -1,6 +1,5 @@
 <# Tag Devices in Airwatch with Manufacturer Name
 
-#Modified by: Adam
 #March 2019
 
   .SYNOPSIS
