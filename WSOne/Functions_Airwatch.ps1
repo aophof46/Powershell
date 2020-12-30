@@ -1,5 +1,31 @@
 # Collection of powershell functions for dot sourcing
 
+Function New-AirwatchAPIHeader {
+    Param (
+        [Parameter(Mandatory=$True)]
+        [string]$AirwatchServer,
+        [Parameter(Mandatory=$True)]
+        [string]$AirwatchUser,
+        [Parameter(Mandatory=$True)]
+        [string]$AirwatchPW,
+        [Parameter(Mandatory=$True)]
+        [string]$AirwatchAPIKey
+    ) 
+    $URL = $AirwatchServer + "/API"
+    #Base64 Encode AW Username and Password
+    $combined = $AirwatchUser + ":" + $AirwatchPW
+    $encoding = [System.Text.Encoding]::ASCII.GetBytes($combined)
+    $cred = [Convert]::ToBase64String($encoding)
+
+    $header = @{
+        "Authorization"  = "Basic $cred";
+        "aw-tenant-code" = $AirwatchAPIKey;
+        "Accept"		 = "application/json";
+        "Content-Type"   = "application/json";
+    }
+    return $header
+}
+
 Function Get-AirwatchDevices {
     Param
     (
