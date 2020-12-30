@@ -20,7 +20,7 @@ if(test-path $ServerPowershellUNC)
     }
 else
     {
-    write-host "Unable to find modules"
+    write-host "Unable to find files"
     exit
     }
     
