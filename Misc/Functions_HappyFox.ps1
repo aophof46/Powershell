@@ -1,4 +1,3 @@
-
 # HF API Technical reference
 # https://www.happyfox.com/developers/api/1.1/
 
@@ -216,7 +215,6 @@ Function Update-HappyFoxAsset
         [int]$HappyFoxID,
         [Parameter(Mandatory=$True)]
         [string]$Name,
-        [Parameter(Mandatory=$True)]
         [string]$DisplayID,
         [int]$ContactID,
         [string]$ComputerName,
@@ -297,10 +295,10 @@ Function Update-HappyFoxAsset
 
     $jsonDoc = [pscustomobject]@{
         name = $Name
-        #display_id = $DisplayID
+        display_id = $DisplayID
         updated_by = $AgentID
-        #contact_ids = $Contacts 
-        #custom_fields = $AssetCustomAttributeObj 
+        contact_ids = $Contacts 
+        custom_fields = $AssetCustomAttributeObj 
     }
     $json = $jsonDoc | Convertto-json
 
