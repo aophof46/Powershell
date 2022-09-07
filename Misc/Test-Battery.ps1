@@ -1,4 +1,3 @@
-<#
 $NumberOfLogicalProcessors = Get-WmiObject win32_processor | Select-Object -ExpandProperty NumberOfLogicalProcessors
  
 ForEach ($core in 1..$NumberOfLogicalProcessors){ 
@@ -22,11 +21,6 @@ start-job -ScriptBlock{
     }
 }
  
-Read-Host "Press any key to exit..."
-Stop-Job * 
-#>
-
-
 $resultsarray = @()
 do {
   $row = New-Object psobject
@@ -42,3 +36,5 @@ do {
   start-sleep 5
 }
 while($true)
+
+Stop-Job * 
